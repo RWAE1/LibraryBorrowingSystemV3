@@ -1,0 +1,11 @@
+# macOS metadata files
+._*
+.DS_Store
+
+# IntelliJ / PyCharm
+.idea/
+*.iml
+out/
+
+# Compiled Java classes
+*.class
