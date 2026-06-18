@@ -62,13 +62,14 @@ public class Multimedia extends LibraryItem {
      * @return array of Multimedia objects pre-filled with default items
      */
     public static Multimedia[] getInitialMultimedia() {
-        // Create an array that can hold 3 Multimedia objects
-        Multimedia[] initial = new Multimedia[3];
+        // Create an array that can hold 4 Multimedia objects
+        Multimedia[] initial = new Multimedia[4];
 
         // Fill each slot with a pre-defined multimedia item
         initial[0] = new Multimedia("MM001", "Inception",          "DVD",       "148 min");
         initial[1] = new Multimedia("MM002", "Dark Side of Moon",  "CD",        "43 min");
         initial[2] = new Multimedia("MM003", "Sapiens Audiobook",  "Audiobook", "15 hrs");
+        initial[3] = new Multimedia("MM004", "Avatar Aang: The Last Airbender",  "DVD", "98 min");
 
         // Return the completed array
         return initial;
