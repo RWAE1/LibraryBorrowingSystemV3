@@ -11,6 +11,7 @@ public class LibraryController {
     private BookController bookController;
     private MemberController memberController;
     private BorrowController borrowController;
+    private ReservationController reservationController;
     private Scanner scanner;
 
     public LibraryController() {
@@ -20,6 +21,7 @@ public class LibraryController {
         this.bookController   = new BookController(librarian, scanner);
         this.memberController = new MemberController(librarian, scanner);
         this.borrowController = new BorrowController(librarian, scanner);
+        this.reservationController = new ReservationController(librarian, scanner);
     }
 
     public void start() {
@@ -36,7 +38,7 @@ public class LibraryController {
                 case 1  -> bookController.handleMenu();
                 case 2  -> memberController.handleMenu();
                 case 3  -> borrowController.handleMenu();
-                case 4  -> menuView.showMessage("Reservations — coming in Meeting 2.");
+                case 4  -> reservationController.handleMenu();
                 case 5  -> menuView.showMessage("Fines — coming in Meeting 2.");
                 case 0  -> menuView.showMessage("Goodbye!");
                 default -> menuView.showError("Invalid option. Try again.");

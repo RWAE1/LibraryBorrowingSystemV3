@@ -364,4 +364,34 @@ public class DatabaseManager {
             return 0;
         }
     }
+
+    public static void updateReservationStatus(String resId, boolean active) {
+        String sql = "UPDATE reservations SET active=? WHERE reservation_id=?";
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+            ps.setInt(1, active ? 1 : 0);
+            ps.setString(2, resId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("updateReservationStatus failed: " + e.getMessage(), e);
+        }
+    }
+
+    public static List<String[]> loadReservationRows() {
+        try (Statement s = getConnection().createStatement();
+             ResultSet rs = s.executeQuery("SELECT * FROM reservations ORDER BY reservation_id")) {
+            List<String[]> rows = new ArrayList<>();
+            while (rs.next()) {
+                rows.add(new String[]{
+                        rs.getString("reservation_id"),
+                        rs.getString("member_id"),
+                        rs.getString("item_id"),
+                        rs.getString("reservation_date"),
+                        String.valueOf(rs.getInt("active"))
+                });
+            }
+            return rows;
+        } catch (SQLException e) {
+            throw new RuntimeException("loadReservationRows failed: " + e.getMessage(), e);
+        }
+    }
 }
