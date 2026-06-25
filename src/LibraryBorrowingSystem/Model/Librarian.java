@@ -143,6 +143,7 @@ public class Librarian extends Person {
 
         recordCount      = DatabaseManager.getBorrowRecordCount();
         reservationCount = DatabaseManager.getReservationCount();
+        fineCount = DatabaseManager.loadFineRows().size();
 
         List<String[]> rows = DatabaseManager.loadBorrowRecordRows();
         int idx = 0;
@@ -315,6 +316,24 @@ public class Librarian extends Person {
         reservations[reservationCount++] = res;
         DatabaseManager.insertReservation(resId, member.getMemberId(), item.getItemId(), resDate);
         return res;
+    }
+
+    // ── Fines ─────────────────────────────────────────────────────────────────
+
+    public Fine issueFine(Member member, LibraryItem item, int daysLate) {
+        // Generate a unique ID using fineCount
+        String fineId = "FINE" + String.format("%03d", fineCount + 1);
+        
+        // Create the fine
+        Fine newFine = new Fine(fineId, member, item, daysLate);
+        
+        // Increment the counter so the next one gets a new number
+        fineCount++;
+        
+        // Save it to the database
+        DatabaseManager.insertFine(newFine);
+        
+        return newFine;
     }
 
     // ── Search by Genre / Type (method overloading) ───────────────────────────
