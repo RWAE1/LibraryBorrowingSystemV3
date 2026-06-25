@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="src.LibraryBorrowingSystem.Controller.BookFXController">
+   <children>
+      <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+               <children>
+                  <TextField promptText="Search by genre...">
+                     <font>
+                        <Font size="13.0" />
+                     </font>
+                  </TextField>
+                  <Button fx:id="genreSearchField" mnemonicParsing="false" onAction="#handleSearch" text="Search" />
+                  <Separator orientation="VERTICAL" prefHeight="31.0" prefWidth="4.0" />
+                  <Button mnemonicParsing="false" onAction="#handleAddBook" text="Add Book" />
+                  <Button mnemonicParsing="false" onAction="#handleDeleteBook" text="Delete Book" />
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </HBox>
+            <TableView fx:id="bookTable" prefHeight="446.0" prefWidth="580.0" VBox.vgrow="ALWAYS">
+              <columns>
+                <TableColumn fx:id="colBookId" text="Book ID" />
+                <TableColumn fx:id="colTitle" prefWidth="180.0" text="Title" />
+                  <TableColumn fx:id="colAuthor" prefWidth="140.0" text="Author" />
+                  <TableColumn fx:id="colGenre" prefWidth="100.0" text="Genre" />
+                  <TableColumn fx:id="colStatus" text="Status" />
+              </columns>
+            </TableView>
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </VBox>
+   </children>
+</AnchorPane>

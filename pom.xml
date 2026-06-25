@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <!-- Project identity -->
-    <groupId>com.fad</groupId>
+    <groupId>LibraryBorrowingSystem</groupId>
     <artifactId>LibraryBorrowingSystem</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
@@ -25,6 +25,16 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.46.1.3</version>
         </dependency>
+            <dependency>
+    <groupId>org.openjfx</groupId>
+    <artifactId>javafx-controls</artifactId>
+    <version>26.0.1</version>
+</dependency>
+<dependency>
+    <groupId>org.openjfx</groupId>
+    <artifactId>javafx-fxml</artifactId>
+    <version>26.0.1</version>
+</dependency>
     </dependencies>
 
     <!-- Build settings -->
@@ -32,18 +42,19 @@
         <sourceDirectory>src</sourceDirectory>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.fad.LibrarySystem.Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
+    <groupId>org.openjfx</groupId>
+    <artifactId>javafx-maven-plugin</artifactId>
+    <version>3.9.16</version>
+    <configuration>
+        <mainClass>LibraryBorrowingSystem.App</mainClass>
+    </configuration>
+</plugin>
         </plugins>
+        <resources>
+    <resource>
+        <directory>src/resources</directory>
+    </resource>
+</resources>
     </build>
-
+    
 </project>

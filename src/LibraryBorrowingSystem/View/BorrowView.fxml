@@ -1,0 +1,52 @@
+package src.LibraryBorrowingSystem.Controller;
+
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+
+public class BorrowFXController {
+
+    @FXML
+    private TableColumn<?, ?> colBorrowDate;
+
+    @FXML
+    private TableColumn<?, ?> colItem;
+
+    @FXML
+    private TableColumn<?, ?> colMember;
+
+    @FXML
+    private TableColumn<?, ?> colRecordId;
+
+    @FXML
+    private TableColumn<?, ?> colReturnDate;
+
+    @FXML
+    private TableColumn<?, ?> colReturnStatus;
+
+    @FXML
+    private TextField itemIdField;
+
+    @FXML
+    private TextField memberIdField;
+
+    @FXML
+    private TableView<?> recordTable;
+
+    @FXML
+    private Label statusLabel;
+
+    @FXML
+    void handleBorrow(ActionEvent event) {
+
+    }
+
+    @FXML
+    void handleReturn(ActionEvent event) {
+
+    }
+
+}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="980.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="src.LibraryBorrowingSystem.Controller.FineFXController">
+   <children>
+      <TableView fx:id="fineTable" prefHeight="600.0" prefWidth="980.0">
+         <columns>
+            <TableColumn fx:id="colFineId" prefWidth="140.0" text="Fine ID" />
+            <TableColumn fx:id="colFineMember" prefWidth="160.0" text="Member" />
+            <TableColumn fx:id="colFineItem" prefWidth="220.0" text="Item" />
+            <TableColumn fx:id="colDaysLate" prefWidth="230.0" text="Days Late" />
+            <TableColumn fx:id="colAmount" prefWidth="230.0" text="Amount (Rp)" />
+         </columns>
+      </TableView>
+   </children>
+</VBox>

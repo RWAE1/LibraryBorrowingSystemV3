@@ -1,0 +1,47 @@
+package src.LibraryBorrowingSystem.Controller;
+
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+
+public class BookFXController {
+
+    @FXML
+    private TableView<?> bookTable;
+
+    @FXML
+    private TableColumn<?, ?> colAuthor;
+
+    @FXML
+    private TableColumn<?, ?> colBookId;
+
+    @FXML
+    private TableColumn<?, ?> colGenre;
+
+    @FXML
+    private TableColumn<?, ?> colStatus;
+
+    @FXML
+    private TableColumn<?, ?> colTitle;
+
+    @FXML
+    private Button genreSearchField;
+
+    @FXML
+    void handleAddBook(ActionEvent event) {
+
+    }
+
+    @FXML
+    void handleDeleteBook(ActionEvent event) {
+
+    }
+
+    @FXML
+    void handleSearch(ActionEvent event) {
+
+    }
+
+}

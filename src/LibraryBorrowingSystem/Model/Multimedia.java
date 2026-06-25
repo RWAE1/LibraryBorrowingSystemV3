@@ -1,6 +1,6 @@
 /**
- * @author      masjohncook X RWAE 1
- * @version     0.0.2
+ * @author      masjohncook X RWAE1
+ * @version     0.0.3
  * @copyright   (C) Copyright 2026
  * @license     None
  * @maintainer  masjohncook

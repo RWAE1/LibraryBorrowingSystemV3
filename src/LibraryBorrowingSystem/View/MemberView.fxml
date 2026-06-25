@@ -1,0 +1,28 @@
+package src.LibraryBorrowingSystem.Controller;
+
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.TableColumn;
+
+public class MemberFXController {
+
+    @FXML
+    private TableColumn<?, ?> colBorrowCount;
+
+    @FXML
+    private TableColumn<?, ?> colMemberId;
+
+    @FXML
+    private TableColumn<?, ?> colName;
+
+    @FXML
+    void handleRegister(ActionEvent event) {
+
+    }
+
+    @FXML
+    void handleRemove(ActionEvent event) {
+
+    }
+
+}

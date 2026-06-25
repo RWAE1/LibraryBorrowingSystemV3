@@ -14,7 +14,7 @@ package LibraryBorrowingSystem.Model;
  */
 public class Fine {
 
-    private String recordId;
+    private String fineId;
     private Member member;
     private LibraryItem item;
     private int daysLate;
@@ -29,40 +29,42 @@ public class Fine {
      * @param item      the item that was returned late
      * @param daysLate  number of days past the due date
      */
-    public Fine(String recordId, Member member, LibraryItem item, int daysLate) {
-        this.recordId  = recordId;
-        this.member    = member;
-        this.item      = item;
-        this.daysLate  = daysLate;
-        this.fineAmount = calculateFine(daysLate);
+    public Fine(String fineId, Member member, LibraryItem item, int daysLate) {
+        this.fineId     = fineId;
+        this.member     = member;
+        this.item       = item;
+        this.daysLate   = daysLate;
+        this.fineAmount = daysLate * 2000;
     }
 
     /**
-     * Computes the fine amount: daysLate * 2000.
-     * Stores the result in fineAmount and returns it.
+     * Calculates the fine amount for a given number of days late.
+     * Pure function — does not modify any state.
      *
      * @param daysLate number of days past the due date
-     * @return total fine in Rupiah
+     * @return fine amount in Rupiah
      */
-    public int calculateFine(int daysLate) {
-        this.fineAmount = daysLate * 2000;
-        return this.fineAmount;
+    public static int calculateFine(int daysLate) {
+        return daysLate * 2000;
     }
 
-    /** Returns a formatted summary of this fine. */
     public String getInfo() {
         return "Fine for: " + member.getName()
-                + " | Item: " + item.getTitle()
-                + " | Days Late: " + daysLate
-                + "\nFine: Rp" + fineAmount;
+                + " | Item: "       + item.getTitle()
+                + " | Days Late: "  + daysLate
+                + "\nFine: Rp"      + fineAmount;
     }
 
-    // ── Getters ───────────────────────────────────────────────────────────────
+    public String      getFineId()     { return fineId; }
+    public int         getFineAmount() { return fineAmount; }
+    public Member      getMember()     { return member; }
+    public LibraryItem getItem()       { return item; }
+    public int         getDaysLate()   { return daysLate; }
 
-    public int    getFineAmount() { return fineAmount; }
-    public Member getMember()     { return member; }
-    public String getRecordId()   { return recordId; }
-    public int    getDaysLate()   { return daysLate; }
+    /** @deprecated Use {@link #getFineId()} instead. */
+    @Deprecated
+    public String getRecordId() { return fineId; }
 
+    @Override
     public String toString() { return getInfo(); }
 }

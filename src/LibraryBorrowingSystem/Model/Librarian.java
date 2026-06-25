@@ -1,6 +1,6 @@
 /**
- * @author      masjohncook X RWAE 1
- * @version     0.0.2
+ * @author      masjohncook X RWAE1
+ * @version     0.0.3
  * @copyright   (C) Copyright 2026
  * @license     None
  * @maintainer  masjohncook
@@ -155,29 +155,7 @@ public class Librarian extends Person {
             r.setReturned(row[5].equals("1"));
             borrowRecords[idx++] = r;
         }
-
-        List<String[]> resRows = DatabaseManager.loadReservationRows();
-        int resIdx = 0;
-        for (String[] row : resRows) {
-            Member m = findMemberById(row[1]);
-            LibraryItem item = findItemById(row[2]);
-            
-            // If the member or item got deleted, skip this reservation
-            if (m == null || item == null) continue; 
-            
-            // row[0] is ID, row[3] is Date
-            Reservation r = new Reservation(row[0], m, item, row[3]);
-            
-            // row[4] is the active status (1 for active, 0 for cancelled)
-            if (row[4].equals("0")) { 
-                r.cancelReservation(); 
-            }
-            
-            // Put it back into the Librarian's array!
-            reservations[resIdx++] = r;
-            }
-        }
-    
+    }
 
     private void seedInitialData() {
         for (Books b : Books.getInitialBooks())                DatabaseManager.insertBook(b);

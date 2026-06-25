@@ -1,0 +1,27 @@
+package src.LibraryBorrowingSystem.Controller;
+
+import javafx.fxml.FXML;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+
+public class FineFXController {
+
+    @FXML
+    private TableColumn<?, ?> colAmount;
+
+    @FXML
+    private TableColumn<?, ?> colDaysLate;
+
+    @FXML
+    private TableColumn<?, ?> colFineId;
+
+    @FXML
+    private TableColumn<?, ?> colFineItem;
+
+    @FXML
+    private TableColumn<?, ?> colFineMember;
+
+    @FXML
+    private TableView<?> fineTable;
+
+}

@@ -1,17 +1,67 @@
+/**
+ * @author      masjohncook X RWAE1
+ * @version     0.0.3
+ * @copyright   (C) Copyright 2026
+ * @license     None
+ * @maintainer  masjohncook
+ * @email       mas.john.cook@gmail.com
+ * @status      Development
+ */
 package LibraryBorrowingSystem.Database;
 
 import LibraryBorrowingSystem.Model.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+/**
+ * Data access layer — handles all communication with the SQLite database.
+ *
+ * DatabaseManager is a static utility class. It maintains a single shared
+ * connection to library.db and exposes methods for every SQL operation
+ * the application needs (schema creation, inserts, updates, deletes, selects).
+ *
+ * Design notes:
+ *   - All methods are static; no instance is ever created.
+ *   - A single Connection is reused across the application lifetime and
+ *     closed via the shutdown hook registered in Main/App.
+ *   - All queries use PreparedStatement to prevent SQL injection.
+ *   - isTableEmpty() validates the table name against a whitelist before
+ *     interpolating it into a query (the one place a table name must be
+ *     built dynamically).
+ *   - Every method throws a RuntimeException on SQL failure so callers
+ *     do not need checked-exception boilerplate for errors that are not
+ *     recoverable at runtime.
+ *
+ * Tables managed:
+ *   - books                : Book catalog
+ *   - multimedia           : Multimedia catalog
+ *   - members              : Registered members
+ *   - member_borrowed_items: Join table tracking what each member currently has on loan
+ *   - borrow_records       : Full history of every borrow transaction
+ *   - reservations         : Active and cancelled holds placed by members
+ *   - fines                : Late-return penalties issued to members
+ */
 public class DatabaseManager {
 
     private static final String DB_URL = "jdbc:sqlite:library.db";
     private static Connection conn;
 
+    /** Whitelist used by isTableEmpty() to prevent SQL injection via table name. */
+    private static final Set<String> KNOWN_TABLES = Set.of(
+            "books", "multimedia", "members", "member_borrowed_items",
+            "borrow_records", "reservations", "fines");
+
     // ── Connection ────────────────────────────────────────────────────────────
 
+    /**
+     * Returns the shared database connection, opening it if necessary.
+     * Enables WAL journal mode (better concurrent read performance) and
+     * foreign key enforcement on every new connection.
+     *
+     * @throws RuntimeException if the connection cannot be established
+     */
     public static Connection getConnection() {
         try {
             if (conn == null || conn.isClosed()) {
@@ -27,6 +77,7 @@ public class DatabaseManager {
         }
     }
 
+    /** Closes the shared connection. Called from the App shutdown hook. */
     public static void close() {
         try {
             if (conn != null && !conn.isClosed()) conn.close();
@@ -35,6 +86,12 @@ public class DatabaseManager {
 
     // ── Schema ────────────────────────────────────────────────────────────────
 
+    /**
+     * Creates all application tables if they do not already exist.
+     * Safe to call on every startup — uses CREATE TABLE IF NOT EXISTS.
+     *
+     * @throws RuntimeException if any table creation fails
+     */
     public static void initSchema() {
         try (Statement s = getConnection().createStatement()) {
             s.execute("""
@@ -81,12 +138,29 @@ public class DatabaseManager {
                         reservation_date TEXT NOT NULL,
                         active           INTEGER NOT NULL DEFAULT 1
                     )""");
+            s.execute("""
+                    CREATE TABLE IF NOT EXISTS fines (
+                        fine_id     TEXT PRIMARY KEY,
+                        member_id   TEXT NOT NULL,
+                        item_id     TEXT NOT NULL,
+                        days_late   INTEGER NOT NULL,
+                        fine_amount INTEGER NOT NULL
+                    )""");
         } catch (SQLException e) {
             throw new RuntimeException("Failed to initialize schema: " + e.getMessage(), e);
         }
     }
 
+    /**
+     * Returns true if the given table contains zero rows.
+     * Used at startup to decide whether seed data needs to be inserted.
+     *
+     * @param table must be one of the known table names (validated against whitelist)
+     * @throws IllegalArgumentException if the table name is not in the whitelist
+     */
     public static boolean isTableEmpty(String table) {
+        if (!KNOWN_TABLES.contains(table))
+            throw new IllegalArgumentException("Unknown table: " + table);
         try (Statement s = getConnection().createStatement();
              ResultSet rs = s.executeQuery("SELECT COUNT(*) FROM " + table)) {
             return !rs.next() || rs.getInt(1) == 0;
@@ -97,6 +171,10 @@ public class DatabaseManager {
 
     // ── Books ─────────────────────────────────────────────────────────────────
 
+    /**
+     * Inserts a book row. Uses INSERT OR IGNORE so duplicate IDs are silently skipped
+     * (safe to call during seed on every startup).
+     */
     public static void insertBook(Books book) {
         String sql = "INSERT OR IGNORE INTO books (book_id, title, author, genre, available) VALUES (?,?,?,?,?)";
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
@@ -111,6 +189,7 @@ public class DatabaseManager {
         }
     }
 
+    /** Deletes the book row with the given ID. */
     public static void deleteBook(String bookId) {
         try (PreparedStatement ps = getConnection().prepareStatement(
                 "DELETE FROM books WHERE book_id=?")) {
@@ -121,6 +200,7 @@ public class DatabaseManager {
         }
     }
 
+    /** Updates title, author, genre, and availability for the given book. */
     public static void updateBook(Books book) {
         String sql = "UPDATE books SET title=?, author=?, genre=?, available=? WHERE book_id=?";
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
@@ -135,6 +215,10 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Updates the available flag for any item — checks books first, then multimedia.
+     * This single method works for both tables so callers do not need to know the item type.
+     */
     public static void updateItemAvailability(String itemId, boolean available) {
         int val = available ? 1 : 0;
         try {
@@ -158,6 +242,7 @@ public class DatabaseManager {
         }
     }
 
+    /** Loads all book rows ordered by ID and returns them as a Book array. */
     public static Books[] loadBooks() {
         try (Statement s = getConnection().createStatement();
              ResultSet rs = s.executeQuery("SELECT * FROM books ORDER BY book_id")) {
@@ -176,6 +261,7 @@ public class DatabaseManager {
 
     // ── Multimedia ────────────────────────────────────────────────────────────
 
+    /** Inserts a multimedia row. Uses INSERT OR IGNORE for safe re-seeding. */
     public static void insertMultimedia(Multimedia item) {
         String sql = "INSERT OR IGNORE INTO multimedia (item_id, title, type, duration, available) VALUES (?,?,?,?,?)";
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
@@ -190,6 +276,7 @@ public class DatabaseManager {
         }
     }
 
+    /** Loads all multimedia rows ordered by ID and returns them as a Multimedia array. */
     public static Multimedia[] loadMultimedia() {
         try (Statement s = getConnection().createStatement();
              ResultSet rs = s.executeQuery("SELECT * FROM multimedia ORDER BY item_id")) {
@@ -208,6 +295,7 @@ public class DatabaseManager {
 
     // ── Members ───────────────────────────────────────────────────────────────
 
+    /** Inserts a member row. Uses INSERT OR IGNORE for safe re-seeding. */
     public static void insertMember(Member member) {
         String sql = "INSERT OR IGNORE INTO members (member_id, name) VALUES (?,?)";
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
@@ -219,6 +307,7 @@ public class DatabaseManager {
         }
     }
 
+    /** Deletes the member row with the given ID. */
     public static void deleteMember(String memberId) {
         try (PreparedStatement ps = getConnection().prepareStatement(
                 "DELETE FROM members WHERE member_id=?")) {
@@ -229,6 +318,7 @@ public class DatabaseManager {
         }
     }
 
+    /** Loads all member rows ordered by ID and returns them as a Member array. */
     public static Member[] loadMembers() {
         try (Statement s = getConnection().createStatement();
              ResultSet rs = s.executeQuery("SELECT * FROM members ORDER BY member_id")) {
@@ -244,6 +334,7 @@ public class DatabaseManager {
 
     // ── Member Borrowed Items ─────────────────────────────────────────────────
 
+    /** Records that a member currently has an item on loan. */
     public static void insertMemberBorrowedItem(String memberId, String itemId) {
         String sql = "INSERT OR IGNORE INTO member_borrowed_items (member_id, item_id) VALUES (?,?)";
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
@@ -255,6 +346,7 @@ public class DatabaseManager {
         }
     }
 
+    /** Removes the on-loan record when a member returns an item. */
     public static void deleteMemberBorrowedItem(String memberId, String itemId) {
         String sql = "DELETE FROM member_borrowed_items WHERE member_id=? AND item_id=?";
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
@@ -266,6 +358,10 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Returns all item IDs currently on loan to the given member.
+     * Used at startup to restore each member's borrowedItems array.
+     */
     public static String[] loadBorrowedItemIds(String memberId) {
         String sql = "SELECT item_id FROM member_borrowed_items WHERE member_id=?";
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
@@ -282,6 +378,7 @@ public class DatabaseManager {
 
     // ── Borrow Records ────────────────────────────────────────────────────────
 
+    /** Inserts a new borrow record row. Uses INSERT OR IGNORE to protect against duplicates. */
     public static void insertBorrowRecord(BorrowRecord record) {
         String sql = "INSERT OR IGNORE INTO borrow_records " +
                 "(record_id, member_id, item_id, borrow_date, return_date, returned) VALUES (?,?,?,?,?,?)";
@@ -298,6 +395,10 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Sets returned=1 and records the return date for the most recent unreturned
+     * borrow record matching the given member and item.
+     */
     public static void markBorrowRecordReturned(String memberId, String itemId, String returnDate) {
         String sql = "UPDATE borrow_records SET return_date=?, returned=1 " +
                 "WHERE member_id=? AND item_id=? AND returned=0";
@@ -320,6 +421,10 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Loads all borrow record rows as raw string arrays for startup reconstruction.
+     * Row format: [record_id, member_id, item_id, borrow_date, return_date, returned(0/1)]
+     */
     public static List<String[]> loadBorrowRecordRows() {
         try (Statement s = getConnection().createStatement();
              ResultSet rs = s.executeQuery("SELECT * FROM borrow_records ORDER BY record_id")) {
@@ -342,6 +447,7 @@ public class DatabaseManager {
 
     // ── Reservations ──────────────────────────────────────────────────────────
 
+    /** Inserts a new reservation row with active=1. */
     public static void insertReservation(String resId, String memberId, String itemId, String resDate) {
         String sql = "INSERT OR IGNORE INTO reservations " +
                 "(reservation_id, member_id, item_id, reservation_date, active) VALUES (?,?,?,?,1)";
@@ -365,17 +471,10 @@ public class DatabaseManager {
         }
     }
 
-    public static void updateReservationStatus(String resId, boolean active) {
-        String sql = "UPDATE reservations SET active=? WHERE reservation_id=?";
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
-            ps.setInt(1, active ? 1 : 0);
-            ps.setString(2, resId);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("updateReservationStatus failed: " + e.getMessage(), e);
-        }
-    }
-
+    /**
+     * Loads all reservation rows as raw string arrays for startup reconstruction.
+     * Row format: [reservation_id, member_id, item_id, reservation_date, active(0/1)]
+     */
     public static List<String[]> loadReservationRows() {
         try (Statement s = getConnection().createStatement();
              ResultSet rs = s.executeQuery("SELECT * FROM reservations ORDER BY reservation_id")) {
@@ -392,6 +491,45 @@ public class DatabaseManager {
             return rows;
         } catch (SQLException e) {
             throw new RuntimeException("loadReservationRows failed: " + e.getMessage(), e);
+        }
+    }
+
+    // ── Fines ─────────────────────────────────────────────────────────────────
+
+    /** Inserts a new fine row. Uses INSERT OR IGNORE to protect against duplicates. */
+    public static void insertFine(Fine fine) {
+        String sql = "INSERT OR IGNORE INTO fines (fine_id, member_id, item_id, days_late, fine_amount) VALUES (?,?,?,?,?)";
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+            ps.setString(1, fine.getFineId());
+            ps.setString(2, fine.getMember().getMemberId());
+            ps.setString(3, fine.getItem().getItemId());
+            ps.setInt(4, fine.getDaysLate());
+            ps.setInt(5, fine.getFineAmount());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("insertFine failed: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Loads all fine rows as raw string arrays for startup reconstruction.
+     * Row format: [fine_id, member_id, item_id, days_late]
+     */
+    public static List<String[]> loadFineRows() {
+        try (Statement s = getConnection().createStatement();
+             ResultSet rs = s.executeQuery("SELECT * FROM fines ORDER BY fine_id")) {
+            List<String[]> rows = new ArrayList<>();
+            while (rs.next()) {
+                rows.add(new String[]{
+                        rs.getString("fine_id"),
+                        rs.getString("member_id"),
+                        rs.getString("item_id"),
+                        String.valueOf(rs.getInt("days_late"))
+                });
+            }
+            return rows;
+        } catch (SQLException e) {
+            throw new RuntimeException("loadFineRows failed: " + e.getMessage(), e);
         }
     }
 }

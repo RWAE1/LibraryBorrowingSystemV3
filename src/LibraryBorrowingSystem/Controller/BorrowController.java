@@ -4,8 +4,6 @@ import LibraryBorrowingSystem.Model.BorrowRecord;
 import LibraryBorrowingSystem.Model.LibraryItem;
 import LibraryBorrowingSystem.Model.Librarian;
 import LibraryBorrowingSystem.Model.Member;
-import LibraryBorrowingSystem.Model.Reservation; // NEW IMPORT
-import LibraryBorrowingSystem.Database.DatabaseManager; // NEW IMPORT
 import LibraryBorrowingSystem.View.BorrowView;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +15,7 @@ public class BorrowController {
     private BorrowView borrowView;
     private Scanner scanner;
 
-    public BorrowController(Librarian librarian, Scanner scanner) {
+public BorrowController(Librarian librarian, Scanner scanner) {
         this.librarian  = librarian;
         this.borrowView = new BorrowView();
         this.scanner    = scanner;
@@ -43,7 +41,7 @@ public class BorrowController {
         }
     }
 
-    private void borrowItem() {
+ private void borrowItem() {
         System.out.print("Member ID : "); String memberId = scanner.nextLine().trim();
         System.out.print("Item ID   : "); String itemId   = scanner.nextLine().trim();
 
@@ -67,38 +65,6 @@ public class BorrowController {
             borrowView.showItemNotAvailable(item.getTitle());
             return;
         }
-
-        // ─── NEW: RESERVATION SECURITY BARRIER ────────────────────────────────
-        boolean allowedToBorrow = true;
-        Reservation[] allRes = librarian.getReservations();
-        int resCount = librarian.getReservationCount();
-
-        for (int i = 0; i < resCount; i++) {
-            Reservation res = allRes[i];
-            
-            // Check if there is an active reservation for this specific item
-            if (res != null && res.getItem().getItemId().equals(item.getItemId()) && res.isActive()) {
-                
-                // Is the person borrowing it DIFFERENT from the person who reserved it?
-                if (!res.getMember().getMemberId().equals(member.getMemberId())) {
-                    borrowView.showError("Access Denied! This item is currently reserved by " + res.getMember().getName() + ".");
-                    allowedToBorrow = false;
-                    break;
-                } else {
-                    // It is the correct person! Fulfill and cancel the reservation.
-                    res.cancelReservation();
-                    DatabaseManager.updateReservationStatus(res.getReservationId(), false);
-                    System.out.println("Reservation fulfilled for " + member.getName() + "!");
-                    break; 
-                }
-            }
-        }
-
-        // If someone else holds the reservation, abort the borrowing process
-        if (!allowedToBorrow) {
-            return;
-        }
-        // ──────────────────────────────────────────────────────────────────────
 
         boolean success = member.borrowItem(item);
         if (success) {
