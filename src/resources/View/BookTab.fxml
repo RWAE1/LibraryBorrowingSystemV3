@@ -12,18 +12,18 @@
 <?import javafx.scene.text.Font?>
 
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="src.LibraryBorrowingSystem.Controller.BookFXController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LibraryBorrowingSystem.Controller.BookFXController">
    <children>
       <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                <children>
-                  <TextField promptText="Search by genre...">
+                  <TextField fx:id="genreSearchField" promptText="Search by genre...">
                      <font>
                         <Font size="13.0" />
                      </font>
                   </TextField>
-                  <Button fx:id="genreSearchField" mnemonicParsing="false" onAction="#handleSearch" text="Search" />
+                  <Button mnemonicParsing="false" onAction="#handleSearch" text="Search" />
                   <Separator orientation="VERTICAL" prefHeight="31.0" prefWidth="4.0" />
                   <Button mnemonicParsing="false" onAction="#handleAddBook" text="Add Book" />
                   <Button mnemonicParsing="false" onAction="#handleDeleteBook" text="Delete Book" />

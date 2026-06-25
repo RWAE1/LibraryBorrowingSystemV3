@@ -11,6 +11,8 @@ package LibraryBorrowingSystem;
 
 import LibraryBorrowingSystem.Controller.BookFXController;
 import LibraryBorrowingSystem.Controller.MemberFXController;
+import LibraryBorrowingSystem.Controller.BorrowFXController;
+import LibraryBorrowingSystem.Controller.FineFXController;
 import LibraryBorrowingSystem.Database.DatabaseManager;
 import LibraryBorrowingSystem.Model.LibraryService;
 import javafx.application.Application;
@@ -61,7 +63,8 @@ public class App extends Application {
 
         tabPane.getTabs().add(loadBookTab());
         tabPane.getTabs().add(loadMemberTab());
-        // Add BorrowTab, FineTab here as each controller is built
+        tabPane.getTabs().add(loadBorrowTab());
+        tabPane.getTabs().add(loadFineTab());
 
         stage.setScene(new Scene(tabPane, 1000, 650));
         stage.setTitle("Library Borrowing System");
@@ -76,7 +79,7 @@ public class App extends Application {
      */
     private Tab loadBookTab() throws Exception {
         FXMLLoader loader = new FXMLLoader(
-            getClass().getResource("/LibraryBorrowingSystem/view/BookTab.fxml"));
+            getClass().getResource("/View/BookTab.fxml"));
         Tab tab = new Tab("Books", loader.load());
         loader.<BookFXController>getController().setService(service);
         return tab;
@@ -90,12 +93,28 @@ public class App extends Application {
      */
     private Tab loadMemberTab() throws Exception {
         FXMLLoader loader = new FXMLLoader(
-            getClass().getResource("/LibraryBorrowingSystem/view/MemberTab.fxml"));
+            getClass().getResource("/View/MemberTab.fxml"));
         Tab tab = new Tab("Members", loader.load());
         loader.<MemberFXController>getController().setService(service);
         return tab;
     }
 
+    private Tab loadBorrowTab() throws Exception {
+        FXMLLoader loader = new FXMLLoader(
+            getClass().getResource("/View/BorrowTab.fxml"));
+        Tab tab = new Tab("Borrow", loader.load());
+        loader.<BorrowFXController>getController().setService(service);
+        return tab;
+    }
+
+    private Tab loadFineTab() throws Exception {
+        FXMLLoader loader = new FXMLLoader(
+            getClass().getResource("/View/FineTab.fxml"));
+        Tab tab = new Tab("Fines", loader.load());
+        loader.<FineFXController>getController().setService(service);
+        return tab;
+    }
+    
     /**
      * Called by JavaFX when the window is closed.
      * Closes the SQLite database connection cleanly.
